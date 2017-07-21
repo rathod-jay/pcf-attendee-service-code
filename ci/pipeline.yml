@@ -1,17 +1,50 @@
 ---
 resources:
-- name: attendee-service
+- name: pcf-attendee-service-code
   type: git
   source:
-    uri: https://github.com/pivotal-enablement/attendee-service
+    uri: https://github.com/rathod-jay/pcf-attendee-service-code
     branch: master
 
+- name: deploy-attendee-service
+  type: cf
+  source:
+    api: api.sys.pikes.pal.pivotal.io
+    username: {{cf-user}}
+    password: {{cf-password}}
+    organization: rjayesh-pal
+    space: sandbox
+    skip_cert_check: true
+
 jobs:
-- name: package
+- name: test
   public: true
   plan:
-  - get: attendee-service
-  - task: package
-    privileged: true
-    file: attendee-service/ci/tasks/package.yml
+  - get: pcf-attendee-service-code
+    trigger: true
+  - task: test
+    file: pcf-attendee-service-code/ci/tasks/test.yml
 
+- name: deploy
+  public: true
+  plan:
+  - get: pcf-attendee-service-code
+    trigger: true
+    passed: [test]
+  - task: package
+    file: pcf-attendee-service-code/ci/tasks/package.yml
+  - put: deploy-attendee-service
+    params:
+      manifest: attendee-service/manifest.yml
+      path: package-output/attendee-service.jar
+
+- name: smoke_test
+  public: true
+  plan:
+  - get: pcf-attendee-service-code
+    trigger: true
+    passed: [deploy]
+  - task: smoke_test
+    file: pcf-attendee-service-code/ci/tasks/smoke-test.yml
+    params:
+      ATTENDEE_SERVICE_URL: https://attendee-service-hyperdiastolic-recalcitrancy.apps.pikes.pal.pivotal.io
