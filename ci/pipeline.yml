@@ -33,7 +33,7 @@ jobs:
     passed: [test]
   - task: package
     file: pcf-attendee-service-code/ci/tasks/package.yml
-  - put: deploy-attendee-service
+  - put: deploy-pcf-attendee-service-code
     params:
       manifest: pcf-attendee-service-code/manifest.yml
       path: package-output/attendee-service.jar
