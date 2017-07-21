@@ -33,9 +33,9 @@ jobs:
     passed: [test]
   - task: package
     file: pcf-attendee-service-code/ci/tasks/package.yml
-  - put: deploy-pcf-attendee-service-code
+  - put: deploy-attendee-service
     params:
-      manifest: pcf-attendee-service-code/manifest.yml
+      manifest: attendee-service/manifest.yml
       path: package-output/attendee-service.jar
 
 - name: smoke_test
